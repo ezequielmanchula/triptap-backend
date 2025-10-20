@@ -6,10 +6,14 @@ import {
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { WebSocketsGateway } from 'src/web-socket/web-socket.gateway';
 
 @Injectable()
 export class BookingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly websocketGateway: WebSocketsGateway,
+  ) {}
 
   //reservar Asiento
   async create(createBookingDto: CreateBookingDto) {
@@ -29,7 +33,7 @@ export class BookingService {
       );
     }
 
-    return this.prisma.booking.create({
+    const booking = await this.prisma.booking.create({
       data: {
         userId,
         tripId,
@@ -38,6 +42,9 @@ export class BookingService {
         isConfirmed: false,
       },
     });
+
+    this.websocketGateway.notifySeatReserved(tripId, seatNumber);
+    return booking;
   }
   //obterner reservas
   async findAll() {
@@ -93,17 +100,25 @@ export class BookingService {
   // // Verificar si la reserva existe
 
   async confirmBooking(bookingId: number) {
-    return this.prisma.booking.update({
+    const booking = await this.prisma.booking.update({
       where: { id: bookingId },
       data: { isConfirmed: true },
     });
+
+    this.websocketGateway.notifyBookingConfirmed(
+      booking.tripId,
+      booking.seatNumber,
+    );
+    return booking;
   }
 
   async cancelBooking(bookingId: number) {
-    return this.prisma.booking.update({
+    const booking = await this.prisma.booking.update({
       where: { id: bookingId },
       data: { isConfirmed: false, isActive: false },
     });
+    this.websocketGateway.notifySeatFreed(booking.tripId, booking.seatNumber);
+    return booking;
   }
 
   async getAvailableSeats(tripId: number) {
