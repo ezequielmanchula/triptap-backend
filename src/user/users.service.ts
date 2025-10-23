@@ -2,30 +2,47 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async register(data: CreateUserDto) {
-    return this.prisma.user.create({ data });
+    const hashed = await bcrypt.hash(data.password, 10);
+    const user = await this.prisma.user.create({ data: { ...data, password: hashed } });
+    // Do not return password
+    const { password, ...safe } = user as any;
+    return safe;
   }
 
   async login(data: LoginUserDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: data.email },
-    });
-    if (!user || user.password !== data.password) {
+    const user = await this.prisma.user.findUnique({ where: { email: data.email } });
+    if (!user) {
       throw new Error('Invalid credentials');
     }
-    return user;
+    const match = await bcrypt.compare(data.password, user.password);
+    if (!match) {
+      throw new Error('Invalid credentials');
+    }
+    const { password, ...safe } = user as any;
+    return safe;
   }
 
+  async findByEmail(email: string) {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+ 
   async findAll() {
-    return this.prisma.user.findMany();
+    const users = await this.prisma.user.findMany();
+    return users.map(({ password, ...rest }) => rest);
   }
-
+ 
   async findOne(id: number) {
-    return this.prisma.user.findUnique({ where: { id } });
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) return null;
+    const { password, ...rest } = user as any;
+    return rest;
   }
+ 
 }

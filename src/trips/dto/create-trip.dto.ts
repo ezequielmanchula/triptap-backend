@@ -1,4 +1,5 @@
-import { TripType } from '@prisma/client';
+// Local TripType definition to match Prisma enum
+export type TripType = 'ONE_WAY' | 'ROUND_TRIP';
 
 export class CreateTripDto {
   origin: string;

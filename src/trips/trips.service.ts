@@ -8,7 +8,7 @@ export class TripsService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(data: CreateTripDto) {
-    return this.prisma.trip.create({ data });
+    return this.prisma.trip.create({ data: data as any });
   }
 
   findAll() {
@@ -20,7 +20,7 @@ export class TripsService {
   }
 
   update(id: number, data: UpdateTripDto) {
-    return this.prisma.trip.update({ where: { id }, data });
+    return this.prisma.trip.update({ where: { id }, data: data as any });
   }
 
   remove(id: number) {
