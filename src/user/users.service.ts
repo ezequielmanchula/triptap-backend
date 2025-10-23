@@ -2,7 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import * as bcrypt from 'bcrypt';
+// Intentar usar bcrypt nativo; si falla (bindings faltantes) usar bcryptjs como fallback para desarrollo
+let bcrypt: any;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  bcrypt = require('bcrypt');
+} catch (e) {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  bcrypt = require('bcryptjs');
+}
 
 @Injectable()
 export class UsersService {
