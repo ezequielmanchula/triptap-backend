@@ -1,7 +1,7 @@
 services:
   - type: web
+    runtime: node
     name: triptap-backend
-    env: node
     plan: free
     buildCommand: pnpm install && pnpm prisma generate && pnpm build
     startCommand: pnpm run start:prod
@@ -17,6 +17,8 @@ services:
           name: triptap-db
           property: connectionString
 
-  - type: pserv
-    name: triptap-db
+databases:
+  - name: triptap-db
     plan: free
+    databaseName: triptap
+    user: triptap_user
