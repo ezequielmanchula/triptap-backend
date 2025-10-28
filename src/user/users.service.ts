@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -20,10 +20,19 @@ export class UsersService {
   ) {}
 
   async register(data: CreateUserDto) {
+    // Sanear teléfono: aceptar formatos como "+54 9 11 1234 5678" y dejar solo dígitos
+    const rawPhone = (data as any).phone;
+    const phoneDigits = typeof rawPhone === 'string' ? rawPhone.replace(/\D/g, '') : String(rawPhone);
+    const phoneNumber = phoneDigits ? parseInt(phoneDigits, 10) : null;
+
+    if (!phoneNumber || Number.isNaN(phoneNumber)) {
+      throw new BadRequestException('Phone number is required and must contain digits');
+    }
+
     const hashed = await bcrypt.hash(data.password, 10);
 
     const user = await this.prisma.user.create({
-      data: { ...data, password: hashed },
+      data: { ...data, phone: phoneNumber, password: hashed },
     });
 
     const { password, ...safe } = user as any;
@@ -58,6 +67,9 @@ export class UsersService {
   }
 
   async findByEmail(email: string) {
+    if (!email || typeof email !== 'string') {
+      throw new BadRequestException('Email is required');
+    }
     return this.prisma.user.findUnique({ where: { email } });
   }
 

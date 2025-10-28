@@ -1,4 +1,4 @@
-import { Controller, Post, Body, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../user/users.service';
 import { CreateUserDto } from '../user/dto/create-user.dto';
@@ -13,6 +13,11 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() dto: CreateUserDto) {
+    if (!dto || !dto.email) {
+      // Devolver error claro si no se envía email
+      throw new BadRequestException('Email is required');
+    }
+
     const existing = await this.usersService.findByEmail(dto.email);
     if (existing) {
       throw new ConflictException('User already exists');
