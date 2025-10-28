@@ -20,5 +20,4 @@ services:
   - type: pserv
     name: triptap-db
     plan: free
-    properties:
-      version: 15
+    databaseVersion: 15
