@@ -1,17 +1,25 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { UsersModule } from '../user/users.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UsersModule } from '../user/users.module';
 
 @Module({
   imports: [
-    UsersModule,
+    // Si UsersModule también importa AuthModule, usamos forwardRef para romper el loop
+    forwardRef(() => UsersModule),
+
+    // Passport para estrategias de auth
     PassportModule,
-    ConfigModule, // para leer variables de entorno
+
+    // ConfigModule para leer variables de entorno
+    ConfigModule,
+
+    // Registro asíncrono de JwtModule con ConfigService
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

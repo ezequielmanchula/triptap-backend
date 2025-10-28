@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { PrismaModule } from '../prisma/prisma.module';
@@ -8,8 +8,8 @@ import { ConfigModule } from '@nestjs/config';    // Para variables de entorno (
 @Module({
   imports: [
     PrismaModule,
-    AuthModule,
     ConfigModule, // asegura acceso a process.env en este módulo
+    forwardRef(() => AuthModule), // rompemos el ciclo con forwardRef
   ],
   controllers: [UsersController],
   providers: [UsersService],
