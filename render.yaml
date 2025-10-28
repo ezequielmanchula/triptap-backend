@@ -17,7 +17,7 @@ services:
           name: triptap-db
           property: connectionString
 
-  - type: postgres
+  - type: pserv
     name: triptap-db
     plan: free
     properties:
