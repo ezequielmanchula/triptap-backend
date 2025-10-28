@@ -14,9 +14,11 @@ async function bootstrap() {
   }));
 
   // Configuración de CORS
-  const allowedOrigins = process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',').map((s) => s.trim())
-    : ['http://localhost:3000', 'http://localhost:5173']; // default para local
+  const allowedOrigins = ['https://trip-tap.netlify.app'];
+
+//  const allowedOrigins = process.env.CORS_ORIGIN
+//    ? process.env.CORS_ORIGIN.split(',').map((s) => s.trim())
+//    : ['http://localhost:3000', 'http://localhost:5173']; // default para local
 
   app.enableCors({
     origin: process.env.NODE_ENV === 'production'
