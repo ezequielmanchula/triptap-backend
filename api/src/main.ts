@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,6 +29,17 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
+
+  // 🚀 Swagger config
+  const config = new DocumentBuilder()
+    .setTitle('TripTap API')
+    .setDescription('API documentation for TripTap backend')
+    .setVersion('1.0')
+    .addBearerAuth() // 👈 para soportar JWT en Swagger
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
   // Puerto dinámico: Render inyecta process.env.PORT, en local usamos 4000
   const port = process.env.PORT || 4000;
