@@ -4,7 +4,7 @@ services:
     name: triptap-backend-api
     plan: free
     # build and start inside the `api/` folder
-    buildCommand: cd api && pnpm install && pnpm prisma generate && pnpm build
+    buildCommand: pnpm install && cd database && pnpm prisma migrate deploy && pnpm prisma generate && cd ../api && pnpm build
     startCommand: cd api && pnpm run start:prod
     envVars:
       - key: NODE_ENV
