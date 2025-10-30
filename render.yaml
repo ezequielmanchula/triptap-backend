@@ -1,11 +1,18 @@
 services:
+  - type: worker
+    runtime: node
+    name: triptap-database
+    rootDir: database
+    buildCommand: pnpm install
+    startCommand: pnpm prisma migrate deploy
+
   - type: web
     runtime: node
     name: triptap-backend-api
-    plan: free
-    # build and start inside the `api/` folder
-    buildCommand: pnpm install && cd database && pnpm prisma migrate deploy && pnpm prisma generate && cd ../api && pnpm build
-    startCommand: cd api && pnpm run start:prod
+    rootDir: api
+    buildCommand: pnpm install && pnpm build
+    startCommand: pnpm run start:prod
+
     envVars:
       - key: NODE_ENV
         value: production
@@ -15,4 +22,3 @@ services:
         value: https://trip-tap.netlify.app
       - key: DATABASE_URL
         sync: false
-        # On Render you will set DATABASE_URL to your Neon connection string.
