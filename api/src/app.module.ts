@@ -7,6 +7,15 @@ import { PrismaModule } from './prisma/prisma.module';
 import { WebSocketModule } from './web-socket/web-socket.module';
 import { UsersModule } from './user/users.module';
 import { AuthModule } from './auth/auth.module';
+import { Controller, Get } from '@nestjs/common';
+
+@Controller()
+export class HealthController {
+  @Get()
+  health() {
+    return { status: 'ok' };
+  }
+}
 
 @Module({
   imports: [
