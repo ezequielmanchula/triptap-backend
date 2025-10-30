@@ -1,18 +1,20 @@
 services:
   - type: worker
     runtime: node
-    name: triptap-database
+    name: triptap-db
     rootDir: database
     buildCommand: pnpm install
     startCommand: pnpm prisma migrate deploy
+    envVars:
+      - key: DATABASE_URL
+        sync: false
 
   - type: web
     runtime: node
     name: triptap-backend-api
     rootDir: api
-    buildCommand: pnpm install && pnpm build
+    buildCommand: pnpm install && pnpm prisma generate && pnpm build
     startCommand: pnpm run start:prod
-
     envVars:
       - key: NODE_ENV
         value: production
