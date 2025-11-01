@@ -84,4 +84,39 @@ export class UsersService {
     const { password, ...rest } = user as any;
     return rest;
   }
+
+  async update(userId: number, dto: any) {
+  // Si viene password, la encriptamos antes de guardar
+  let dataToUpdate: any = { ...dto };
+
+  if (dto.password) {
+    dataToUpdate.password = await bcrypt.hash(dto.password, 10);
+  }
+
+  // Si viene phone, lo saneamos como en register
+  if (dto.phone) {
+    const phoneDigits =
+      typeof dto.phone === 'string'
+        ? dto.phone.replace(/\D/g, '')
+        : String(dto.phone);
+    const phoneNumber = phoneDigits ? parseInt(phoneDigits, 10) : null;
+
+    if (!phoneNumber || Number.isNaN(phoneNumber)) {
+      throw new BadRequestException(
+        'Phone number must contain digits only',
+      );
+    }
+    dataToUpdate.phone = phoneNumber;
+  }
+
+  const user = await this.prisma.user.update({
+    where: { id: userId },
+    data: dataToUpdate,
+  });
+
+  const { password, ...safe } = user as any;
+  return safe;
+  }
+
+
 }

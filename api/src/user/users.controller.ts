@@ -14,6 +14,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { UserProfileDto } from './dto/user-profile.dto';
 import { ApiTags, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { Patch } from '@nestjs/common';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -68,4 +70,20 @@ export class UsersController {
     }
     return this.usersService.findOne(+id);
   }
+
+    @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Patch('me')
+  @ApiResponse({
+    status: 200,
+    description: 'Perfil actualizado correctamente',
+    type: UserProfileDto,
+  })
+  async updateProfile(
+    @CurrentUser() user: any,
+    @Body() dto: UpdateUserDto,
+  ): Promise<UserProfileDto> {
+    return this.usersService.update(user.id, dto);
+  }
+
 }
